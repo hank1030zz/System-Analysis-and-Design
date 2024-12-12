@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .summary, .payment-options, .rewards-section, .address-section {
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .rewards-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .reward-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            background-color: #fff;
+            width: 150px;
+        }
+        .reward-item button {
+            background-color: #007BFF;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .reward-item button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Checkout</h1>
+        <div>Points: <span id="points">100</span></div>
+    </header>
+    <div class="container">
+        <div class="summary">
+            <h2>Order Summary</h2>
+            <ul id="cart-items"></ul>
+            <p>Total: $<span id="total-price">0</span></p>
+            <p>Earned Points: <span id="earned-points">0</span></p>
+        </div>
+        <div class="payment-options">
+            <h2>Payment Options</h2>
+            <label>
+                <input type="checkbox" id="use-points" onchange="updateTotal()">
+                Use points (10 points = $1 discount)
+            </label>
+            <p>Discount from Points: $<span id="discount">0</span></p>
+            <p>Final Total: $<span id="final-total">0</span></p>
+            <h3>Select Payment Method</h3>
+            <select id="payment-method">
+                <option value="visa">Visa</option>
+                <option value="wechat">WeChat</option>
+                <option value="atm">ATM Transfer</option>
+                <option value="cod">Cash on Delivery</option>
+            </select>
+        </div>
+        <div class="address-section">
+            <h2>Shipping Address</h2>
+            <label for="address">Address:</label>
+            <input type="text" id="address" placeholder="Enter your address" style="width: 100%; padding: 10px; margin-top: 10px;">
+        </div>
+        <div class="rewards-section">
+            <h2>Redeem Rewards</h2>
+            <div class="rewards-list">
+                <div class="reward-item">
+                    <h4>Gift Card</h4>
+                    <p>150 points</p>
+                    <button onclick="redeemReward(150, 'Gift Card')">Redeem</button>
+                </div>
+                <div class="reward-item">
+                    <h4>Headphones</h4>
+                    <p>200 points</p>
+                    <button onclick="redeemReward(200, 'Headphones')">Redeem</button>
+                </div>
+                <div class="reward-item">
+                    <h4>Smartwatch</h4>
+                    <p>500 points</p>
+                    <button onclick="redeemReward(500, 'Smartwatch')">Redeem</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let points = parseInt(localStorage.getItem('points')) || 100;
+        const cartItemsElement = document.getElementById('cart-items');
+        const totalPriceElement = document.getElementById('total-price');
+        const earnedPointsElement = document.getElementById('earned-points');
+        const pointsElement = document.getElementById('points');
+        const discountElement = document.getElementById('discount');
+        const finalTotalElement = document.getElementById('final-total');
+
+        function renderCart() {
+            let total = 0;
+            cartItemsElement.innerHTML = '';
+            cart.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.name} - $${item.price}`;
+                cartItemsElement.appendChild(li);
+                total += item.price;
+            });
+            totalPriceElement.textContent = total;
+            earnedPointsElement.textContent = Math.floor(total * 0.01);
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const total = parseFloat(totalPriceElement.textContent);
+            const usePoints = document.getElementById('use-points').checked;
+            const discount = usePoints ? Math.min(points, Math.floor(total * 10)) / 10 : 0;
+            discountElement.textContent = discount.toFixed(2);
+            finalTotalElement.textContent = (total - discount).toFixed(2);
+        }
+
+        function redeemReward(cost, reward) {
+            if (points >= cost) {
+                points -= cost;
+                pointsElement.textContent = points;
+                localStorage.setItem('points', points);
+                alert(`You redeemed ${reward}!`);
+            } else {
+                alert('Not enough points to redeem this reward.');
+            }
+        }
+
+        pointsElement.textContent = points;
+        renderCart();
+    </script>
+</body>
+</html>
